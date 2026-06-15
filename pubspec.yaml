@@ -15,8 +15,8 @@ topics:
   - interaction
 
 environment:
-  sdk: ^3.5.0
-  flutter: ">=3.22.0"
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
@@ -25,4 +25,4 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0

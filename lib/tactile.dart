@@ -9,7 +9,7 @@
 ///   child: const FlutterLogo(size: 120),
 /// )
 /// ```
-library tactile;
+library;
 
 export 'src/components.dart';
 export 'src/tactile.dart';
