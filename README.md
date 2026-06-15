@@ -137,6 +137,21 @@ cd example && flutter run
 (`TactileButton`, `TactileCard`, `TactileTile`) with neumorphic shadow-morph.
 A dedicated gesture recognizer for tighter scrollable coexistence is next.
 
+## Development
+
+This repo is pinned to a Flutter version with [FVM](https://fvm.app)
+(see `.fvmrc`). With FVM installed:
+
+```sh
+fvm install              # gets the pinned Flutter version
+fvm flutter pub get
+fvm flutter test
+fvm flutter analyze
+```
+
+(Plain `flutter` works too if your global SDK satisfies the constraints in
+`pubspec.yaml`.)
+
 ## License
 
 MIT © 2026
