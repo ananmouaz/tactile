@@ -1,8 +1,7 @@
 name: tactile
 description: >-
-  Make any Flutter widget feel physical when you touch it — it tilts toward
-  your finger, depresses at the exact press point, and a specular highlight
-  tracks where you press. Compositor-only, no shaders, works everywhere.
+  Make any widget feel physical: it tilts toward your finger, depresses at the
+  press point, and a glare tracks where you press. Compositor-only, no shaders.
 version: 0.1.0
 repository: https://github.com/ananmouaz/tactile
 issue_tracker: https://github.com/ananmouaz/tactile/issues

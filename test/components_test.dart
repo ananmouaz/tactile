@@ -4,20 +4,16 @@ import 'package:tactile/tactile.dart';
 
 void main() {
   Widget host(Widget child) => Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(child: child),
-      );
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 
-  testWidgets('TactileButton fires onTap and builds on a Tactile',
-      (tester) async {
+  testWidgets('TactileButton fires onTap and builds on a Tactile', (
+    tester,
+  ) async {
     var taps = 0;
     await tester.pumpWidget(
-      host(
-        TactileButton(
-          onTap: () => taps++,
-          child: const Text('go'),
-        ),
-      ),
+      host(TactileButton(onTap: () => taps++, child: const Text('go'))),
     );
 
     expect(find.byType(Tactile), findsOneWidget);
@@ -43,8 +39,9 @@ void main() {
     expect(taps, 0);
   });
 
-  testWidgets('TactileTile lays out leading, title, and trailing',
-      (tester) async {
+  testWidgets('TactileTile lays out leading, title, and trailing', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       host(
         const SizedBox(
@@ -66,9 +63,7 @@ void main() {
 
   testWidgets('shadow flattens as the surface is pressed', (tester) async {
     await tester.pumpWidget(
-      host(
-        const TactileCard(child: SizedBox(width: 160, height: 100)),
-      ),
+      host(const TactileCard(child: SizedBox(width: 160, height: 100))),
     );
 
     BoxShadow firstShadow() {

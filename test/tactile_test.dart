@@ -10,7 +10,8 @@ void main() {
     bool disableAnimations = false,
     Tactile? tactile,
   }) {
-    final child = tactile ??
+    final child =
+        tactile ??
         Tactile(
           onTap: onTap,
           enabled: enabled,
@@ -45,13 +46,15 @@ void main() {
     expect(taps, 0);
   });
 
-  testWidgets('applies a transform while pressed and reverts on release',
-      (tester) async {
+  testWidgets('applies a transform while pressed and reverts on release', (
+    tester,
+  ) async {
     await tester.pumpWidget(boxApp(onTap: () {}));
 
     Matrix4? transformDuringPress() {
-      final transforms =
-          tester.widgetList<Transform>(find.byType(Transform)).toList();
+      final transforms = tester
+          .widgetList<Transform>(find.byType(Transform))
+          .toList();
       return transforms.isEmpty ? null : transforms.first.transform;
     }
 
@@ -74,27 +77,31 @@ void main() {
     expect(find.byType(Transform), findsNothing);
   });
 
-  testWidgets('exposes button semantics only when onTap is provided',
-      (tester) async {
+  testWidgets('exposes button semantics only when onTap is provided', (
+    tester,
+  ) async {
     final handle = tester.ensureSemantics();
 
     // With onTap: exposes a tappable button to assistive technologies.
     await tester.pumpWidget(boxApp(onTap: () {}));
-    final withTap =
-        tester.getSemantics(find.byType(Tactile)).getSemanticsData();
+    final withTap = tester
+        .getSemantics(find.byType(Tactile))
+        .getSemanticsData();
     expect(withTap.hasAction(SemanticsAction.tap), isTrue);
 
     // Without onTap: no tap action is advertised.
     await tester.pumpWidget(boxApp());
-    final withoutTap =
-        tester.getSemantics(find.byType(Tactile)).getSemanticsData();
+    final withoutTap = tester
+        .getSemantics(find.byType(Tactile))
+        .getSemanticsData();
     expect(withoutTap.hasAction(SemanticsAction.tap), isFalse);
 
     handle.dispose();
   });
 
-  testWidgets('suppresses tilt under reduce-motion but keeps depress',
-      (tester) async {
+  testWidgets('suppresses tilt under reduce-motion but keeps depress', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       boxApp(
         disableAnimations: true,
@@ -106,15 +113,14 @@ void main() {
       ),
     );
 
-    await tester.startGesture(
-      tester.getCenter(find.byType(Tactile)),
-    );
+    await tester.startGesture(tester.getCenter(find.byType(Tactile)));
     await tester.pump(); // establish the ticker start time
     await tester.pump(const Duration(milliseconds: 60)); // advance the press
 
     // Only the depress Transform.scale should be present — no perspective tilt.
-    final transforms =
-        tester.widgetList<Transform>(find.byType(Transform)).toList();
+    final transforms = tester
+        .widgetList<Transform>(find.byType(Transform))
+        .toList();
     expect(transforms.length, 1);
     // A pure scale matrix has no perspective entry at (3, 2).
     expect(transforms.first.transform.entry(3, 2), 0);
@@ -123,9 +129,7 @@ void main() {
   testWidgets('presets construct without error', (tester) async {
     await tester.pumpWidget(
       boxApp(
-        tactile: const Tactile.subtle(
-          child: SizedBox(width: 100, height: 100),
-        ),
+        tactile: const Tactile.subtle(child: SizedBox(width: 100, height: 100)),
       ),
     );
     expect(find.byType(Tactile), findsOneWidget);

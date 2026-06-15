@@ -237,10 +237,7 @@ class TactileTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ?title,
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  subtitle!,
-                ],
+                if (subtitle != null) ...[const SizedBox(height: 2), subtitle!],
               ],
             ),
           ),

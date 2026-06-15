@@ -62,7 +62,10 @@ class _Intro extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       'Press, hold, and drag your finger across anything below.',
-      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 15),
+      style: TextStyle(
+        color: Colors.white.withValues(alpha: 0.6),
+        fontSize: 15,
+      ),
     );
   }
 }
@@ -82,11 +85,7 @@ class _WrapAnythingSection extends StatelessWidget {
         alignment: WrapAlignment.center,
         children: [
           // Flutter logo.
-          Tactile(
-            onTap: () {},
-            tilt: 0.2,
-            child: const FlutterLogo(size: 84),
-          ),
+          Tactile(onTap: () {}, tilt: 0.2, child: const FlutterLogo(size: 84)),
           // An icon in a colored circle.
           Tactile(
             onTap: () {},
@@ -170,23 +169,20 @@ class _PresetsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget swatch(String label) => Container(
-          width: 96,
-          height: 96,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF2D2F45), Color(0xFF20222F)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        );
+      width: 96,
+      height: 96,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2D2F45), Color(0xFF20222F)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+    );
 
     return _Section(
       title: 'Presets',
@@ -223,7 +219,8 @@ class _StyledSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return _Section(
       title: 'Styled components',
-      subtitle: 'They own their surface, so shadows morph from raised to flush.',
+      subtitle:
+          'They own their surface, so shadows morph from raised to flush.',
       child: Column(
         children: [
           // Light neumorphic panel — surface matches background.

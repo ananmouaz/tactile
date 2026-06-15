@@ -45,15 +45,12 @@ class Tactile extends StatefulWidget {
     this.springBack = true,
     this.enabled = true,
     this.onPressUpdate,
-  })  : assert(tilt >= 0, 'tilt must be non-negative'),
-        assert(
-          depress >= 0 && depress < 1,
-          'depress must be in [0, 1)',
-        ),
-        assert(
-          glareIntensity >= 0 && glareIntensity <= 1,
-          'glareIntensity must be in [0, 1]',
-        );
+  }) : assert(tilt >= 0, 'tilt must be non-negative'),
+       assert(depress >= 0 && depress < 1, 'depress must be in [0, 1)'),
+       assert(
+         glareIntensity >= 0 && glareIntensity <= 1,
+         'glareIntensity must be in [0, 1]',
+       );
 
   /// A restrained preset: small tilt and depress, soft glare.
   ///
@@ -67,14 +64,14 @@ class Tactile extends StatefulWidget {
     this.borderRadius = BorderRadius.zero,
     this.glareColor = const Color(0xFFFFFFFF),
     this.enabled = true,
-  })  : tilt = 0.08,
-        depress = 0.02,
-        glare = true,
-        glareIntensity = 0.18,
-        pressCurve = Curves.easeOut,
-        pressDuration = const Duration(milliseconds: 110),
-        springBack = true,
-        onPressUpdate = null;
+  }) : tilt = 0.08,
+       depress = 0.02,
+       glare = true,
+       glareIntensity = 0.18,
+       pressCurve = Curves.easeOut,
+       pressDuration = const Duration(milliseconds: 110),
+       springBack = true,
+       onPressUpdate = null;
 
   /// An exaggerated preset: bigger tilt and depress, bright bouncy glare.
   ///
@@ -87,14 +84,14 @@ class Tactile extends StatefulWidget {
     this.borderRadius = BorderRadius.zero,
     this.glareColor = const Color(0xFFFFFFFF),
     this.enabled = true,
-  })  : tilt = 0.28,
-        depress = 0.07,
-        glare = true,
-        glareIntensity = 0.5,
-        pressCurve = Curves.easeOut,
-        pressDuration = const Duration(milliseconds: 70),
-        springBack = true,
-        onPressUpdate = null;
+  }) : tilt = 0.28,
+       depress = 0.07,
+       glare = true,
+       glareIntensity = 0.5,
+       pressCurve = Curves.easeOut,
+       pressDuration = const Duration(milliseconds: 70),
+       springBack = true,
+       onPressUpdate = null;
 
   /// The widget made tactile. Its layout is never modified.
   final Widget child;
@@ -154,10 +151,8 @@ class Tactile extends StatefulWidget {
 }
 
 /// Signature for [Tactile.onPressUpdate].
-typedef TactilePressCallback = void Function(
-  double progress,
-  Offset normalized,
-);
+typedef TactilePressCallback =
+    void Function(double progress, Offset normalized);
 
 class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
   /// Drives press progress in `[0, 1]`. Both the depress amount and the tilt
@@ -186,10 +181,8 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _press = AnimationController(
-      vsync: this,
-      duration: widget.pressDuration,
-    )..addListener(_onTick);
+    _press = AnimationController(vsync: this, duration: widget.pressDuration)
+      ..addListener(_onTick);
   }
 
   @override
@@ -286,7 +279,8 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
     if (widget.onTap == null || !_effectsAllowed) {
       return KeyEventResult.ignored;
     }
-    final isActivate = event.logicalKey == LogicalKeyboardKey.enter ||
+    final isActivate =
+        event.logicalKey == LogicalKeyboardKey.enter ||
         event.logicalKey == LogicalKeyboardKey.space;
     if (!isActivate) return KeyEventResult.ignored;
     if (event is KeyDownEvent) {
@@ -334,8 +328,9 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
       // Point-origin depress: scale toward the finger by offsetting the scale
       // origin from the center to the touch point.
       if (widget.depress > 0) {
-        final origin =
-            _local == null ? Offset.zero : _local! - _size.center(Offset.zero);
+        final origin = _local == null
+            ? Offset.zero
+            : _local! - _size.center(Offset.zero);
         content = Transform.scale(
           scale: 1 - widget.depress * progress,
           origin: origin,

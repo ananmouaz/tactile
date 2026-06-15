@@ -14,10 +14,9 @@ const _frameDir = '/tmp/tactile_styled_frames';
 const _pixelRatio = 2.0;
 const _pointerId = 9;
 
-void main() => runApp(const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: _Stage(),
-    ));
+void main() => runApp(
+  const MaterialApp(debugShowCheckedModeBanner: false, home: _Stage()),
+);
 
 class _Stage extends StatefulWidget {
   const _Stage();
@@ -43,8 +42,9 @@ class _StageState extends State<_Stage> {
     final data = await img.toByteData(format: ui.ImageByteFormat.png);
     img.dispose();
     if (data == null) return;
-    await File('$_frameDir/frame_${i.toString().padLeft(4, '0')}.png')
-        .writeAsBytes(data.buffer.asUint8List());
+    await File(
+      '$_frameDir/frame_${i.toString().padLeft(4, '0')}.png',
+    ).writeAsBytes(data.buffer.asUint8List());
   }
 
   Future<void> _run() async {
@@ -56,7 +56,8 @@ class _StageState extends State<_Stage> {
     final viewId = View.of(_btnKey.currentContext!).viewId;
     final origin = btn.localToGlobal(Offset.zero);
     // Press at upper-right of the button so tilt is visible alongside depress.
-    final press = origin + Offset(btn.size.width * 0.72, btn.size.height * 0.32);
+    final press =
+        origin + Offset(btn.size.width * 0.72, btn.size.height * 0.32);
 
     var f = 0;
     // A few frames at rest.
@@ -67,14 +68,18 @@ class _StageState extends State<_Stage> {
     }
     // Press in and hold.
     _dispatch(PointerAddedEvent(viewId: viewId, position: press));
-    _dispatch(PointerDownEvent(viewId: viewId, pointer: _pointerId, position: press));
+    _dispatch(
+      PointerDownEvent(viewId: viewId, pointer: _pointerId, position: press),
+    );
     for (var i = 0; i < 34; i++, f++) {
       setState(() {});
       await WidgetsBinding.instance.endOfFrame;
       await _shot(canvas, f);
     }
     // Release and spring back.
-    _dispatch(PointerUpEvent(viewId: viewId, pointer: _pointerId, position: press));
+    _dispatch(
+      PointerUpEvent(viewId: viewId, pointer: _pointerId, position: press),
+    );
     for (var i = 0; i < 26; i++, f++) {
       setState(() {});
       await WidgetsBinding.instance.endOfFrame;
