@@ -1,3 +1,11 @@
+## 0.2.0
+
+- `Tactile` now drives its press with a custom gesture recognizer that
+  participates in Flutter's gesture arena. Inside a scrollable (`ListView`,
+  `PageView`, …) it yields to the scroll's drag and springs back instead of
+  animating alongside it, while standalone widgets still track the finger as
+  before. Taps and finger-tracking are unchanged.
+
 ## 0.1.0
 
 Initial release.

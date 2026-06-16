@@ -167,10 +167,6 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
   /// Size of the child, captured on pointer-down from the render box.
   Size _size = Size.zero;
 
-  /// The pointer we are tracking. We follow the first pointer only and ignore
-  /// the rest, so multi-touch can't tear the effect in two directions.
-  int? _pointer;
-
   /// True once the active pointer has moved far enough to count as a drag,
   /// at which point we yield to scrollables and suppress [Tactile.onTap].
   bool _dragging = false;
@@ -200,18 +196,24 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
 
   bool get _effectsAllowed => widget.enabled;
 
-  // --- Pointer handling ------------------------------------------------------
+  // --- Press handling (driven by the arena recognizer) -----------------------
 
-  void _onPointerDown(PointerDownEvent event) {
-    if (!_effectsAllowed || _pointer != null) return;
-    final box = context.findRenderObject() as RenderBox?;
-    if (box == null || !box.hasSize) return;
-    _pointer = event.pointer;
+  /// The Tactile's render box, or null if not laid out.
+  RenderBox? get _box {
+    final object = context.findRenderObject();
+    return object is RenderBox && object.hasSize ? object : null;
+  }
+
+  void _onPressStart(Offset globalPosition) {
+    if (!_effectsAllowed) return;
+    final box = _box;
+    if (box == null) return;
+    final local = box.globalToLocal(globalPosition);
     _dragging = false;
-    _downPosition = event.localPosition;
+    _downPosition = local;
     setState(() {
       _size = box.size;
-      _local = event.localPosition;
+      _local = local;
     });
     _press.animateTo(
       1,
@@ -220,32 +222,32 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
     );
   }
 
-  void _onPointerMove(PointerMoveEvent event) {
-    if (event.pointer != _pointer) return;
-    if (!_dragging &&
-        (event.localPosition - _downPosition).distance > kTouchSlop) {
+  void _onPressMove(Offset globalPosition) {
+    final box = _box;
+    if (box == null) return;
+    final local = box.globalToLocal(globalPosition);
+    if (!_dragging && (local - _downPosition).distance > kTouchSlop) {
       // Moved far enough to count as a drag rather than a tap: keep tracking
       // the finger (that's the whole effect), but suppress onTap on release.
       _dragging = true;
     }
-    setState(() => _local = event.localPosition);
+    setState(() => _local = local);
     _notify();
   }
 
-  void _onPointerUp(PointerUpEvent event) {
-    if (event.pointer != _pointer) return;
+  void _onPressEnd(Offset globalPosition) {
     final wasDrag = _dragging;
-    final position = event.localPosition;
+    final local = _box?.globalToLocal(globalPosition);
     _release();
-    if (!wasDrag && _isInside(position)) {
+    if (!wasDrag && local != null && _isInside(local)) {
       widget.onTap?.call();
     }
   }
 
-  void _onPointerCancel(PointerCancelEvent event) {
-    if (event.pointer != _pointer) return;
-    _release();
-  }
+  /// Called when another recognizer wins the arena (most importantly a
+  /// [Scrollable]'s drag) or the gesture is cancelled: yield by springing back
+  /// without firing onTap, so the scroll takes over cleanly.
+  void _onPressCancel() => _release();
 
   bool _isInside(Offset position) =>
       position.dx >= 0 &&
@@ -254,7 +256,6 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
       position.dy <= _size.height;
 
   void _release() {
-    _pointer = null;
     _dragging = false;
     if (widget.springBack) {
       // Spring the press progress back to rest. Tilt and depress are both
@@ -355,14 +356,25 @@ class _TactileState extends State<Tactile> with SingleTickerProviderStateMixin {
 
     content = RepaintBoundary(child: content);
 
-    content = Listener(
-      onPointerDown: _onPointerDown,
-      onPointerMove: _onPointerMove,
-      onPointerUp: _onPointerUp,
-      onPointerCancel: _onPointerCancel,
-      behavior: HitTestBehavior.opaque,
-      child: content,
-    );
+    if (_effectsAllowed) {
+      content = RawGestureDetector(
+        behavior: HitTestBehavior.opaque,
+        gestures: {
+          _TactilePressRecognizer:
+              GestureRecognizerFactoryWithHandlers<_TactilePressRecognizer>(
+                _TactilePressRecognizer.new,
+                (recognizer) {
+                  recognizer
+                    ..onStart = _onPressStart
+                    ..onUpdate = _onPressMove
+                    ..onEnd = _onPressEnd
+                    ..onCancel = _onPressCancel;
+                },
+              ),
+        },
+        child: content,
+      );
+    }
 
     if (widget.onLongPress != null && _effectsAllowed) {
       content = GestureDetector(
@@ -469,4 +481,91 @@ class _GlarePainter extends CustomPainter {
   @override
   bool shouldRepaint(_GlarePainter old) =>
       old.center != center || old.opacity != opacity || old.color != color;
+}
+
+/// A single-pointer press recognizer that participates in the gesture arena.
+///
+/// It starts the press visual immediately on touch-down and keeps reporting
+/// finger movement while it stays a contender. If another recognizer wins the
+/// arena — most importantly a [Scrollable]'s drag — [onCancel] fires so
+/// [Tactile] yields and springs back instead of fighting the scroll. When it is
+/// the sole contender (a standalone widget) it wins on pointer-up and [onEnd]
+/// fires, so dragging your finger around still tilts the widget.
+///
+/// Positions are reported in the global coordinate space; the listener converts
+/// them to local coordinates.
+class _TactilePressRecognizer extends OneSequenceGestureRecognizer {
+  /// Called on touch-down with the initial global position.
+  ValueChanged<Offset>? onStart;
+
+  /// Called as the pointer moves, with its global position.
+  ValueChanged<Offset>? onUpdate;
+
+  /// Called when the press is released while still a contender (a real press).
+  ValueChanged<Offset>? onEnd;
+
+  /// Called when the arena rejects this recognizer or the gesture is cancelled.
+  VoidCallback? onCancel;
+
+  int? _pointer;
+
+  /// Once the gesture is won or lost we stop driving the visual and just wait
+  /// for the pointer to lift.
+  bool _resolved = false;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    if (_pointer != null) return; // track a single pointer only
+    _pointer = event.pointer;
+    _resolved = false;
+    startTrackingPointer(event.pointer, event.transform);
+    onStart?.call(event.position);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event.pointer != _pointer) return;
+
+    if (_resolved) {
+      if (event is PointerUpEvent || event is PointerCancelEvent) {
+        stopTrackingPointer(_pointer!);
+        _pointer = null;
+      }
+      return;
+    }
+
+    if (event is PointerMoveEvent) {
+      onUpdate?.call(event.position);
+    } else if (event is PointerUpEvent) {
+      _resolved = true;
+      onEnd?.call(event.position);
+      // Win the arena if no one else has (e.g. a standalone widget, or a tap
+      // inside a scrollable that never became a drag).
+      resolve(GestureDisposition.accepted);
+      stopTrackingPointer(_pointer!);
+      _pointer = null;
+    } else if (event is PointerCancelEvent) {
+      _resolved = true;
+      onCancel?.call();
+      stopTrackingPointer(_pointer!);
+      _pointer = null;
+    }
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    if (pointer == _pointer && !_resolved) {
+      _resolved = true;
+      onCancel?.call();
+    }
+    super.rejectGesture(pointer);
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    _pointer = null;
+  }
+
+  @override
+  String get debugDescription => 'tactile_press';
 }

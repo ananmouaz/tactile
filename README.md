@@ -124,10 +124,10 @@ run on the compositor and never touch the child's layout.
 - The effect follows your finger as you drag, while `onTap` is suppressed once
   the press becomes a drag (so dragging never counts as a tap).
 
-> **Scrollables:** `Tactile` observes pointers passively (it doesn't claim the
-> gesture arena), so a `ListView`/`PageView` still scrolls normally — the effect
-> simply animates alongside the drag. A dedicated gesture recognizer for tighter
-> coexistence is planned.
+> **Scrollables:** `Tactile` drives its press through a gesture recognizer that
+> joins the gesture arena, so inside a `ListView`/`PageView` it yields to the
+> scroll's drag (springing back) instead of animating alongside it. Taps and
+> standalone finger-tracking are unaffected.
 
 ## Example
 
@@ -139,9 +139,9 @@ cd example && flutter run
 
 ## Status
 
-`v0.1.0` ships the core `Tactile` wrapper plus the styled components
-(`TactileButton`, `TactileCard`, `TactileTile`) with neumorphic shadow-morph.
-A dedicated gesture recognizer for tighter scrollable coexistence is next.
+The core `Tactile` wrapper, the styled components (`TactileButton`,
+`TactileCard`, `TactileTile`) with neumorphic shadow-morph, and gesture-arena
+coexistence with scrollables are all in place.
 
 ## Development
 

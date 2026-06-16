@@ -143,4 +143,89 @@ void main() {
     );
     expect(find.byType(Tactile), findsOneWidget);
   });
+
+  testWidgets('a drag keeps the effect but suppresses onTap', (tester) async {
+    var taps = 0;
+    await tester.pumpWidget(boxApp(onTap: () => taps++));
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Tactile)),
+    );
+    await tester.pump(); // establish ticker
+    await tester.pump(const Duration(milliseconds: 40));
+    // Drag past the touch slop but stay within bounds.
+    await gesture.moveBy(const Offset(40, 0));
+    await tester.pump();
+
+    // Still pressed/tilting while the finger is down.
+    expect(find.byType(Transform), findsWidgets);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(taps, 0); // a drag is not a tap
+    expect(find.byType(Transform), findsNothing); // released
+  });
+
+  testWidgets('yields to a scrolling ListView instead of blocking it', (
+    tester,
+  ) async {
+    var taps = 0;
+    final controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: controller,
+            children: [
+              Tactile(
+                onTap: () => taps++,
+                child: const SizedBox(
+                  height: 120,
+                  child: Center(child: Text('row')),
+                ),
+              ),
+              for (var i = 0; i < 30; i++)
+                SizedBox(height: 120, child: Text('item $i')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.offset, 0);
+
+    // Fling upward starting on the tactile row — the scroll should win.
+    await tester.fling(find.text('row'), const Offset(0, -400), 1200);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, greaterThan(0)); // the list scrolled
+    expect(taps, 0); // the drag did not register as a tap
+  });
+
+  testWidgets('a tap inside a ListView still fires onTap', (tester) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            children: [
+              Tactile(
+                onTap: () => taps++,
+                child: const SizedBox(
+                  height: 120,
+                  child: Center(child: Text('row')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('row'));
+    await tester.pumpAndSettle();
+
+    expect(taps, 1);
+  });
 }

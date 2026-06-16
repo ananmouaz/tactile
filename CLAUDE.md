@@ -68,6 +68,13 @@ fvm flutter pub publish --dry-run
 - **Finger-tracking persists through drags.** `onTap` is suppressed once a press
   passes `kTouchSlop`, but the visual keeps following the finger — that's the
   marquee feature, don't "release on drag."
+- **Gesture arena.** `Tactile` drives the press via `_TactilePressRecognizer`
+  (a `OneSequenceGestureRecognizer`) inside a `RawGestureDetector`, not a passive
+  `Listener`. It starts the visual on touch-down and keeps it while it's a
+  contender; if a competitor wins (a `Scrollable`'s drag → `rejectGesture`), it
+  springs back so the scroll takes over. As the sole contender it wins on
+  pointer-up. Keep this arena behavior when touching gesture code — there are
+  tests for scroll coexistence and tap-inside-list.
 - **Glare is for colored/dark surfaces.** On flat matte surfaces a white glare
   looks like a stray spotlight, so styled components default `glareIntensity` to
   0 and rely on tilt + depress + shadow-morph + recess.
@@ -112,8 +119,5 @@ file for the pattern.
 
 ## Known follow-ups
 
-- **Custom `GestureRecognizer`** so `Tactile` competes in the gesture arena and
-  coexists cleanly inside scrollables (`ListView`/`PageView`) — the headline
-  `0.2.0` feature. Today `Tactile` uses a passive `Listener`, so a scroll and the
-  tilt animate simultaneously.
 - Verify the feel on a real device at 120 Hz (simulators cap at 60).
+- Optional: haptics on press; a live "controls" panel in the example for tuning.
