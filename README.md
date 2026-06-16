@@ -1,5 +1,10 @@
 # tactile
 
+[![pub package](https://img.shields.io/pub/v/tactile.svg)](https://pub.dev/packages/tactile)
+[![pub points](https://img.shields.io/pub/points/tactile)](https://pub.dev/packages/tactile/score)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/ananmouaz/tactile/actions/workflows/ci.yml/badge.svg)](https://github.com/ananmouaz/tactile/actions/workflows/ci.yml)
+
 **Make any Flutter widget feel physical when you touch it.** It tilts toward
 your finger, depresses at the exact press point, and a specular highlight
 tracks where you press.
@@ -27,10 +32,11 @@ follows *where and how* you touch. That's what `tactile` does, and it works on
 
 ## Install
 
-```yaml
-dependencies:
-  tactile: ^0.1.0
+```sh
+flutter pub add tactile
 ```
+
+Then `import 'package:tactile/tactile.dart';`.
 
 ## Usage
 
