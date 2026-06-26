@@ -140,51 +140,54 @@ class _CaptureStageState extends State<_CaptureStage> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: const Color(0xFF000000),
-      child: Center(
-        child: RepaintBoundary(
-          key: _canvasKey,
-          child: Container(
-            width: 520,
-            height: 360,
-            decoration: const BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment(-0.3, -0.4),
-                radius: 1.2,
-                colors: [Color(0xFF1A1A22), Color(0xFF0B0B0F)],
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Tactile.playful(
-              borderRadius: BorderRadius.circular(32),
-              child: Container(
-                key: _heroKey,
-                width: 240,
-                height: 160,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7F5BFF), Color(0xFF49C6E5)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF7F5BFF).withValues(alpha: 0.4),
-                      blurRadius: 40,
-                      spreadRadius: -8,
-                    ),
-                  ],
+    return Material(
+      type: MaterialType.transparency,
+      child: ColoredBox(
+        color: const Color(0xFF000000),
+        child: Center(
+          child: RepaintBoundary(
+            key: _canvasKey,
+            child: Container(
+              width: 520,
+              height: 360,
+              decoration: const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(-0.3, -0.4),
+                  radius: 1.2,
+                  colors: [Color(0xFF1A1A22), Color(0xFF0B0B0F)],
                 ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'tactile',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
+              ),
+              alignment: Alignment.center,
+              child: Tactile.playful(
+                borderRadius: BorderRadius.circular(32),
+                child: Container(
+                  key: _heroKey,
+                  width: 240,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7F5BFF), Color(0xFF49C6E5)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF7F5BFF).withValues(alpha: 0.4),
+                        blurRadius: 40,
+                        spreadRadius: -8,
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'tactile',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ),
               ),

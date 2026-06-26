@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tactile/tactile.dart';
 
@@ -25,6 +26,25 @@ void main() {
       ),
     );
   }
+
+  // Captures haptic calls on the platform channel for the duration of a test.
+  List<MethodCall> trackHaptics(WidgetTester tester) {
+    final calls = <MethodCall>[];
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      calls.add(call);
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+    return calls;
+  }
+
+  List<Object?> hapticArgs(List<MethodCall> calls) => calls
+      .where((c) => c.method == 'HapticFeedback.vibrate')
+      .map((c) => c.arguments)
+      .toList();
 
   testWidgets('fires onTap when released inside bounds', (tester) async {
     var taps = 0;
@@ -227,5 +247,186 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(taps, 1);
+  });
+
+  testWidgets('fires the configured haptic on a confirmed tap', (tester) async {
+    final calls = trackHaptics(tester);
+    await tester.pumpWidget(
+      boxApp(
+        tactile: Tactile(
+          onTap: () {},
+          haptics: TactileHaptics.light,
+          child: const SizedBox(width: 200, height: 100),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(Tactile));
+    await tester.pumpAndSettle();
+
+    expect(hapticArgs(calls), ['HapticFeedbackType.lightImpact']);
+  });
+
+  testWidgets('does not fire a haptic when the press becomes a drag', (
+    tester,
+  ) async {
+    final calls = trackHaptics(tester);
+    await tester.pumpWidget(
+      boxApp(
+        tactile: Tactile(
+          onTap: () {},
+          haptics: TactileHaptics.medium,
+          child: const SizedBox(width: 200, height: 100),
+        ),
+      ),
+    );
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Tactile)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    await gesture.moveBy(const Offset(60, 0)); // past the touch slop → a drag
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(hapticArgs(calls), isEmpty);
+  });
+
+  testWidgets('does not fire a haptic when haptics is none', (tester) async {
+    final calls = trackHaptics(tester);
+    await tester.pumpWidget(boxApp(onTap: () {})); // default haptics: none
+
+    await tester.tap(find.byType(Tactile));
+    await tester.pumpAndSettle();
+
+    expect(hapticArgs(calls), isEmpty);
+  });
+
+  testWidgets(
+    'long-press escalation deepens, then fires onLongPress + a stronger haptic',
+    (tester) async {
+      final calls = trackHaptics(tester);
+      var longPresses = 0;
+      var progress = 0.0;
+      await tester.pumpWidget(
+        boxApp(
+          tactile: Tactile(
+            onLongPress: () => longPresses++,
+            haptics: TactileHaptics.light,
+            onPressUpdate: (p, _) => progress = p,
+            feel: const TactileFeel(
+              longPressEscalation: true,
+              escalationDuration: Duration(milliseconds: 200),
+            ),
+            child: const SizedBox(width: 200, height: 100),
+          ),
+        ),
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(Tactile)),
+      );
+      await tester.pump(); // establish ticker
+      await tester.pump(const Duration(milliseconds: 120)); // engage completes
+
+      final engaged = progress;
+      expect(engaged, greaterThan(0.4));
+      expect(engaged, lessThan(0.8)); // engaged, not yet escalated
+      expect(longPresses, 0);
+
+      await tester.pump(const Duration(milliseconds: 260)); // creep completes
+
+      expect(progress, greaterThan(engaged)); // deepened past engage
+      expect(longPresses, 1);
+      expect(hapticArgs(calls), ['HapticFeedbackType.mediumImpact']);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('Tactile.from builds with a preset feel', (tester) async {
+    await tester.pumpWidget(
+      boxApp(
+        tactile: const Tactile.from(
+          TactileFeel.playful,
+          child: SizedBox(width: 200, height: 100),
+        ),
+      ),
+    );
+    expect(find.byType(Tactile), findsOneWidget);
+  });
+
+  test('TactileFeel presets, copyWith, and equality', () {
+    expect(TactileFeel.standard, const TactileFeel());
+    expect(TactileFeel.subtle == TactileFeel.playful, isFalse);
+    expect(TactileFeel.subtle.copyWith(tilt: 0.5).tilt, 0.5);
+    expect(
+      const TactileFeel(tilt: 0.1).hashCode,
+      const TactileFeel(tilt: 0.1).hashCode,
+    );
+  });
+
+  testWidgets('Tactile inherits its feel from an enclosing TactileTheme', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: TactileTheme(
+            // An all-off feel: a press should produce no visual transform.
+            data: const TactileThemeData(
+              feel: TactileFeel(tilt: 0, depress: 0, glare: false),
+            ),
+            child: Center(
+              child: Tactile(
+                onTap: () {},
+                child: const SizedBox(width: 200, height: 100),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.startGesture(tester.getCenter(find.byType(Tactile)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+
+    // Standard defaults would tilt; the theme's all-off feel was used instead.
+    expect(find.byType(Transform), findsNothing);
+  });
+
+  testWidgets('an explicit parameter overrides the theme feel', (tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: TactileTheme(
+            data: const TactileThemeData(
+              feel: TactileFeel(tilt: 0, depress: 0, glare: false),
+            ),
+            child: Center(
+              child: Tactile(
+                onTap: () {},
+                tilt: 0.3, // overrides the theme's tilt: 0
+                child: const SizedBox(width: 200, height: 100),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.startGesture(tester.getCenter(find.byType(Tactile)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+
+    expect(find.byType(Transform), findsWidgets);
   });
 }

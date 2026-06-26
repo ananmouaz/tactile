@@ -5,9 +5,10 @@ set -euo pipefail
 
 FRAMES="${1:-/tmp/tactile_gif_frames}"
 OUT="${2:-doc/tactile.gif}"
-FPS=24
-WIDTH=460
-COLORS=128
+# Overridable via env, e.g. COLORS=96 FPS=20 tool/make_gif.sh <frames> <out>
+FPS="${FPS:-24}"
+WIDTH="${WIDTH:-460}"
+COLORS="${COLORS:-128}"
 
 mkdir -p "$(dirname "$OUT")"
 

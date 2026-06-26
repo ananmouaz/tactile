@@ -43,6 +43,10 @@ class GalleryPage extends StatelessWidget {
                 SizedBox(height: 36),
                 _PresetsSection(),
                 SizedBox(height: 36),
+                _HapticsSection(),
+                SizedBox(height: 36),
+                _ThemeSection(),
+                SizedBox(height: 36),
                 _StyledSection(),
                 SizedBox(height: 36),
                 _TilesSection(),
@@ -162,7 +166,7 @@ class _WrapAnythingSection extends StatelessWidget {
   }
 }
 
-/// Section 2 — the same card with each preset, side by side.
+/// Section 2 — the TactileFeel presets, side by side.
 class _PresetsSection extends StatelessWidget {
   const _PresetsSection();
 
@@ -184,34 +188,133 @@ class _PresetsSection extends StatelessWidget {
       child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
     );
 
+    Widget preset(TactileFeel feel, String label) => Tactile.from(
+      feel,
+      borderRadius: BorderRadius.circular(22),
+      onTap: () {},
+      child: swatch(label),
+    );
+
     return _Section(
-      title: 'Presets',
-      subtitle: 'subtle · default · playful — feel the difference.',
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      title: 'Feel presets',
+      subtitle:
+          'TactileFeel.subtle · crisp · playful · heavy — or roll your own.',
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        alignment: WrapAlignment.spaceEvenly,
         children: [
-          Tactile.subtle(
-            borderRadius: BorderRadius.circular(22),
-            onTap: () {},
-            child: swatch('subtle'),
-          ),
-          Tactile(
-            borderRadius: BorderRadius.circular(22),
-            onTap: () {},
-            child: swatch('default'),
-          ),
-          Tactile.playful(
-            borderRadius: BorderRadius.circular(22),
-            onTap: () {},
-            child: swatch('playful'),
-          ),
+          preset(TactileFeel.subtle, 'subtle'),
+          preset(TactileFeel.crisp, 'crisp'),
+          preset(TactileFeel.playful, 'playful'),
+          preset(TactileFeel.heavy, 'heavy'),
         ],
       ),
     );
   }
 }
 
-/// Section 3 — styled components that own their surface (shadow morph).
+/// Section 3 — haptics + long-press escalation. Hold to feel the deep press.
+class _HapticsSection extends StatefulWidget {
+  const _HapticsSection();
+
+  @override
+  State<_HapticsSection> createState() => _HapticsSectionState();
+}
+
+class _HapticsSectionState extends State<_HapticsSection> {
+  String _last = 'Tap for a light haptic · hold to escalate';
+
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Haptics & hold',
+      subtitle: 'Feedback fires only on a confirmed press — never on a scroll.',
+      child: Container(
+        padding: const EdgeInsets.all(26),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE9ECF2),
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Column(
+          children: [
+            TactileButton(
+              onTap: () => setState(() => _last = 'Tap → light haptic'),
+              onLongPress: () =>
+                  setState(() => _last = 'Hold → escalated, medium haptic'),
+              style: const TactileStyle(
+                haptics: TactileHaptics.light,
+                longPressEscalation: true,
+              ),
+              child: const Text(
+                'Press or hold',
+                style: TextStyle(
+                  color: Color(0xFF2A2D34),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _last,
+              style: const TextStyle(color: Color(0xFF6B6F78), fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Section 4 — a TactileTheme sets the feel once for everything below it.
+class _ThemeSection extends StatelessWidget {
+  const _ThemeSection();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget dot(String label) => Container(
+      width: 84,
+      height: 84,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF49C6E5), Color(0xFF7F5BFF)],
+        ),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+
+    return _Section(
+      title: 'Theme',
+      subtitle:
+          'TactileTheme(feel: TactileFeel.playful) — every Tactile below inherits it.',
+      child: TactileTheme(
+        data: const TactileThemeData(feel: TactileFeel.playful),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            for (final label in ['one', 'two', 'three'])
+              Tactile(
+                onTap: () {},
+                borderRadius: BorderRadius.circular(100),
+                child: dot(label),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Section 5 — styled components that own their surface (shadow morph).
 class _StyledSection extends StatelessWidget {
   const _StyledSection();
 
@@ -299,7 +402,7 @@ class _StyledSection extends StatelessWidget {
   }
 }
 
-/// Section 4 — a list of tactile rows.
+/// Section 6 — a list of tactile rows.
 class _TilesSection extends StatelessWidget {
   const _TilesSection();
 
