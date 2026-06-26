@@ -88,4 +88,31 @@ void main() {
 
     expect(firstShadow().blurRadius, lessThan(atRest));
   });
+
+  testWidgets('a styled component inherits its style from TactileTheme', (
+    tester,
+  ) async {
+    const themed = Color(0xFF112233);
+    await tester.pumpWidget(
+      host(
+        const TactileTheme(
+          data: TactileThemeData(style: TactileStyle(color: themed)),
+          child: TactileButton(child: Text('go')),
+        ),
+      ),
+    );
+
+    final surface = tester
+        .widgetList<DecoratedBox>(
+          find.descendant(
+            of: find.byType(TactileButton),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .map((d) => d.decoration as BoxDecoration)
+        .firstWhere((d) => d.color != null);
+
+    // At rest the surface color is the themed color (no press darkening yet).
+    expect(surface.color, themed);
+  });
 }

@@ -50,11 +50,60 @@ Tactile(
 )
 ```
 
-### Presets
+### Feel presets
+
+A `TactileFeel` bundles the press parameters; named presets cover the common
+cases, and `Tactile.from` applies one:
 
 ```dart
-Tactile.subtle(child: ...)   // restrained — cards, list rows, dense UI
-Tactile.playful(child: ...)  // exaggerated — hero buttons, demo scenes
+Tactile.from(TactileFeel.subtle,  child: ...)  // restrained — cards, dense UI
+Tactile.from(TactileFeel.crisp,   child: ...)  // quick and snappy
+Tactile.from(TactileFeel.playful, child: ...)  // exaggerated — hero buttons
+Tactile.from(TactileFeel.heavy,   child: ...)  // deep, slow, with a haptic
+
+Tactile.subtle(child: ...)   // shorthand, still supported
+Tactile.playful(child: ...)
+```
+
+Start from a preset and tweak one knob — individual parameters always win:
+
+```dart
+Tactile(feel: TactileFeel.playful, tilt: 0.1, child: ...)
+```
+
+<p align="center">
+  <img src="doc/presets.gif" alt="The subtle, crisp, playful, and heavy presets pressed in turn" width="420">
+</p>
+
+### Haptics
+
+Opt into haptic feedback, fired only on a **confirmed** interaction — a real
+tap, keyboard activation, or a completed long-press escalation. A press that
+turns into a scroll never buzzes:
+
+```dart
+Tactile(onTap: () {}, haptics: TactileHaptics.light, child: ...)
+```
+
+`TactileHaptics` is `none` (default), `light`, `medium`, `heavy`, or
+`selection`. With `longPressEscalation: true`, holding deepens the press and
+fires `onLongPress` plus a stronger haptic when it clicks into place:
+
+<p align="center">
+  <img src="doc/escalation.gif" alt="A button deepening as it is held, then springing back" width="320">
+</p>
+
+### Theme
+
+Set a default feel — and a default `TactileStyle` for the styled components —
+once for a whole subtree with `TactileTheme`. Individual widgets still override
+it:
+
+```dart
+TactileTheme(
+  data: const TactileThemeData(feel: TactileFeel.crisp),
+  child: MyApp(),
+)
 ```
 
 ### Styled components
@@ -81,6 +130,14 @@ Pass a `TactileStyle` to control the surface (`color`, `gradient`,
 `glareIntensity`). Neumorphic shadows read best when `color` is close to the
 surrounding background.
 
+<p align="center">
+  <img src="doc/button.gif" alt="A neumorphic button flattening as it is pressed" width="300">
+  <img src="doc/tile.gif" alt="A tactile list row depressing under the finger" width="300">
+</p>
+<p align="center">
+  <img src="doc/card.gif" alt="A glossy gradient card tilting with a glare that tracks the finger" width="360">
+</p>
+
 ### Tuning
 
 | Parameter        | Default            | What it does                                        |
@@ -94,7 +151,12 @@ surrounding background.
 | `springBack`     | `true`             | Release uses spring physics (vs. reversed curve).   |
 | `pressCurve`     | `Curves.easeOut`   | Curve while pressing in.                             |
 | `pressDuration`  | `90ms`             | Press-in duration.                                  |
+| `haptics`        | `none`             | Haptic on a confirmed press: `light`/`medium`/`heavy`/`selection`. |
+| `longPressEscalation` | `false`       | Hold to deepen the press; fires `onLongPress` on completion. |
 | `enabled`        | `true`             | When `false`, no effects and callbacks don't fire.  |
+
+Any of these can be left unset and supplied by a `feel:` bundle or a
+`TactileTheme`; an explicit value here always wins.
 
 ## How it works
 
@@ -118,7 +180,10 @@ run on the compositor and never touch the child's layout.
 - Respects the platform **reduce-motion** setting: tilt and glare are dropped,
   leaving only a quiet depress as the press affordance.
 - Exposes **button semantics** and a tap action when `onTap` is provided.
-- Supports **keyboard activation** (Enter/Space) when focused.
+- Supports **keyboard activation** (Enter/Space) when focused — which also
+  fires the configured haptic.
+- Haptics fire only on a **confirmed** interaction, so a press that becomes a
+  scroll never produces stray feedback.
 - `enabled: false` disables all effects and callbacks.
 - Tracks a single pointer; multi-touch can't tear the effect in two directions.
 - The effect follows your finger as you drag, while `onTap` is suppressed once
@@ -140,8 +205,9 @@ cd example && flutter run
 ## Status
 
 The core `Tactile` wrapper, the styled components (`TactileButton`,
-`TactileCard`, `TactileTile`) with neumorphic shadow-morph, and gesture-arena
-coexistence with scrollables are all in place.
+`TactileCard`, `TactileTile`) with neumorphic shadow-morph, gesture-arena
+coexistence with scrollables, feel presets (`TactileFeel`), app-wide theming
+(`TactileTheme`), haptics, and long-press escalation are all in place.
 
 ## Development
 

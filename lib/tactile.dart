@@ -9,6 +9,11 @@
 ///   child: const FlutterLogo(size: 120),
 /// )
 /// ```
+///
+/// Tune the press with a [TactileFeel] preset (`Tactile.from(TactileFeel.playful,
+/// …)`), set a default feel for a subtree with a [TactileTheme], add
+/// [TactileHaptics], or use the styled components ([TactileButton],
+/// [TactileCard], [TactileTile]) that own their surface.
 library;
 
 export 'src/components.dart';

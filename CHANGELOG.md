@@ -1,3 +1,22 @@
+## 0.3.0
+
+- **Haptics.** New `TactileHaptics` (`none`/`light`/`medium`/`heavy`/`selection`)
+  fired on a *confirmed* interaction only — a real tap, keyboard activation, or a
+  completed long-press escalation. A press that turns into a scroll never buzzes.
+  Set it via `Tactile(haptics: …)` or `TactileStyle(haptics: …)`.
+- **Feel presets.** New `TactileFeel` bundles the press parameters with named
+  presets — `TactileFeel.standard`, `.subtle`, `.crisp`, `.playful`, `.heavy`.
+  Apply one with `Tactile.from(TactileFeel.playful, …)`. `Tactile.subtle()` and
+  `Tactile.playful()` remain as shorthands.
+- **Theme.** New `TactileTheme`/`TactileThemeData` (an `InheritedWidget`) set a
+  default feel — and a default `TactileStyle` for the styled components — once for
+  a whole subtree. Individual parameters on a widget still win over the theme.
+- **Long-press escalation.** With `longPressEscalation: true`, holding deepens the
+  press past its engage level and "clicks into place" — firing `onLongPress` and a
+  stronger haptic when the deepening completes. Driven by the single existing press
+  controller, so release still springs everything back together.
+- No breaking changes: existing `Tactile`/`TactileStyle` code behaves identically.
+
 ## 0.2.0
 
 - `Tactile` now drives its press with a custom gesture recognizer that

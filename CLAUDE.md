@@ -32,9 +32,11 @@ lib/src/tactile.dart      # the core Tactile wrapper (the headline feature)
 lib/src/components.dart    # TactileButton/Card/Tile + TactileStyle (styled layer)
 test/                      # widget tests
 example/lib/main.dart      # the gallery (what users see)
-example/lib/demo_capture*.dart  # maintainer-only GIF capture entrypoints
-tool/make_gif.sh           # assembles captured frames into doc/tactile.gif
-doc/tactile.gif            # README hero
+example/test/capture_frames_test.dart  # headless GIF-frame capture (all scenes)
+example/lib/demo_capture*.dart  # maintainer-only macOS-window capture entrypoints
+tool/make_gif.sh           # assembles captured frames into a doc/*.gif
+doc/*.gif                  # README hero + feature GIFs (tactile, presets, button,
+                           #   escalation, card, tile)
 ```
 
 ## The verify loop (run before every commit)
@@ -85,19 +87,33 @@ Respect `MediaQuery.disableAnimations` (drop tilt/glare, keep a quiet depress),
 expose button semantics + a tap action when `onTap` is set, support keyboard
 activation, and honor `enabled: false`. There are tests for these.
 
-## Regenerating the marketing GIF
+## Regenerating the marketing GIFs
 
-1. In `example/macos/Runner/DebugProfile.entitlements`, set
-   `com.apple.security.app-sandbox` to `<false/>` (lets the app write frames to
-   `/tmp`). **Revert it to `<true/>` afterward.**
-2. `cd example && fvm flutter run -d macos -t lib/demo_capture.dart`
-   (or `demo_capture_styled.dart`). It drives a synthetic pointer, writes PNG
-   frames, and exits.
-3. `tool/make_gif.sh /tmp/tactile_gif_frames doc/tactile.gif` (needs `ffmpeg`).
+**Preferred — headless, captures all scenes (`doc/tactile.gif` + the feature
+GIFs).** This renders offscreen via `pump()` + `RenderRepaintBoundary.toImage()`,
+so it's deterministic and needs no window or sandbox toggle:
 
-The capture works by injecting real pointer events via
-`GestureBinding.instance.handlePointerEvent` with the correct `viewId` — see the
-file for the pattern.
+1. `cd example && fvm flutter test test/capture_frames_test.dart` — writes PNG
+   frames to `/tmp/tactile_{hero,presets,button,escalation,card,tile}_frames`.
+   (It loads Arial via `FontLoader` because headless tests otherwise render the
+   Ahem box font, and uses icon-free visuals for the same reason.)
+2. From the repo root, assemble each (needs `ffmpeg`):
+   ```sh
+   tool/make_gif.sh /tmp/tactile_hero_frames       doc/tactile.gif
+   tool/make_gif.sh /tmp/tactile_presets_frames    doc/presets.gif
+   tool/make_gif.sh /tmp/tactile_button_frames     doc/button.gif
+   tool/make_gif.sh /tmp/tactile_escalation_frames doc/escalation.gif
+   tool/make_gif.sh /tmp/tactile_card_frames       doc/card.gif
+   tool/make_gif.sh /tmp/tactile_tile_frames       doc/tile.gif
+   ```
+
+**Alternative — real macOS window** (`demo_capture.dart` / `demo_capture_styled.dart`):
+set `com.apple.security.app-sandbox` to `<false/>` in
+`example/macos/Runner/DebugProfile.entitlements` (**revert to `<true/>` after**),
+then `cd example && fvm flutter run -d macos -t lib/demo_capture.dart`. These
+render real system fonts/icons but **stall if the window is ever occluded**
+(Flutter throttles frames for hidden windows), so keep the window frontmost.
+Both paths inject pointer events via `GestureBinding.instance.handlePointerEvent`.
 
 ## Releasing a new version
 

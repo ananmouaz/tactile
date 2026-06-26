@@ -91,25 +91,28 @@ class _StageState extends State<_Stage> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: const Color(0xFF0B0B0F),
-      child: Center(
-        child: RepaintBoundary(
-          key: _canvasKey,
-          child: Container(
-            width: 460,
-            height: 300,
-            color: const Color(0xFFE9ECF2),
-            alignment: Alignment.center,
-            child: TactileButton(
-              key: _btnKey,
-              onTap: () {},
-              child: const Text(
-                'Press me',
-                style: TextStyle(
-                  color: Color(0xFF2A2D34),
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+    return Material(
+      type: MaterialType.transparency,
+      child: ColoredBox(
+        color: const Color(0xFF0B0B0F),
+        child: Center(
+          child: RepaintBoundary(
+            key: _canvasKey,
+            child: Container(
+              width: 460,
+              height: 300,
+              color: const Color(0xFFE9ECF2),
+              alignment: Alignment.center,
+              child: TactileButton(
+                key: _btnKey,
+                onTap: () {},
+                child: const Text(
+                  'Press me',
+                  style: TextStyle(
+                    color: Color(0xFF2A2D34),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

@@ -19,6 +19,8 @@ class TactileStyle {
     this.depress = 0.08,
     this.glareColor = const Color(0xFFFFFFFF),
     this.glareIntensity = 0,
+    this.haptics = TactileHaptics.none,
+    this.longPressEscalation = false,
   });
 
   /// Base surface color. Neumorphic shadows are derived from it, so it reads
@@ -57,6 +59,14 @@ class TactileStyle {
   /// raise it (e.g. `0.3`) when you give the style a [gradient].
   final double glareIntensity;
 
+  /// Haptic feedback fired on a confirmed press. Defaults to
+  /// [TactileHaptics.none].
+  final TactileHaptics haptics;
+
+  /// Whether holding deepens the press and fires `onLongPress` on completion.
+  /// Defaults to `false`.
+  final bool longPressEscalation;
+
   /// Returns a copy with the given fields replaced.
   TactileStyle copyWith({
     Color? color,
@@ -69,6 +79,8 @@ class TactileStyle {
     double? depress,
     Color? glareColor,
     double? glareIntensity,
+    TactileHaptics? haptics,
+    bool? longPressEscalation,
   }) {
     return TactileStyle(
       color: color ?? this.color,
@@ -81,8 +93,43 @@ class TactileStyle {
       depress: depress ?? this.depress,
       glareColor: glareColor ?? this.glareColor,
       glareIntensity: glareIntensity ?? this.glareIntensity,
+      haptics: haptics ?? this.haptics,
+      longPressEscalation: longPressEscalation ?? this.longPressEscalation,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TactileStyle &&
+        other.color == color &&
+        other.gradient == gradient &&
+        other.borderRadius == borderRadius &&
+        other.padding == padding &&
+        other.elevation == elevation &&
+        other.lightDirection == lightDirection &&
+        other.tilt == tilt &&
+        other.depress == depress &&
+        other.glareColor == glareColor &&
+        other.glareIntensity == glareIntensity &&
+        other.haptics == haptics &&
+        other.longPressEscalation == longPressEscalation;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    color,
+    gradient,
+    borderRadius,
+    padding,
+    elevation,
+    lightDirection,
+    tilt,
+    depress,
+    glareColor,
+    glareIntensity,
+    haptics,
+    longPressEscalation,
+  );
 }
 
 /// A tactile, neumorphic button. Tilts and depresses toward the finger while
@@ -116,7 +163,8 @@ class TactileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TactileSurface(
-      style: style ?? const TactileStyle(),
+      style:
+          style ?? TactileTheme.maybeOf(context)?.style ?? const TactileStyle(),
       onTap: onTap,
       onLongPress: onLongPress,
       enabled: enabled,
@@ -164,7 +212,7 @@ class TactileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TactileSurface(
-      style: style ?? _defaults,
+      style: style ?? TactileTheme.maybeOf(context)?.style ?? _defaults,
       onTap: onTap,
       onLongPress: onLongPress,
       enabled: enabled,
@@ -224,7 +272,7 @@ class TactileTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TactileSurface(
-      style: style ?? _defaults,
+      style: style ?? TactileTheme.maybeOf(context)?.style ?? _defaults,
       onTap: onTap,
       onLongPress: onLongPress,
       enabled: enabled,
@@ -285,6 +333,8 @@ class _TactileSurfaceState extends State<_TactileSurface> {
       glare: s.glareIntensity > 0,
       glareColor: s.glareColor,
       glareIntensity: s.glareIntensity,
+      haptics: s.haptics,
+      longPressEscalation: s.longPressEscalation,
       borderRadius: s.borderRadius,
       onPressUpdate: (progress, _) {
         if (progress != _progress) setState(() => _progress = progress);
