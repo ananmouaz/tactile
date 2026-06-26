@@ -128,8 +128,8 @@ Both paths inject pointer events via `GestureBinding.instance.handlePointerEvent
 ## Commit rules
 
 - Commit/push only when asked.
-- **Author is Mouaz only — do NOT add a `Co-Authored-By: Claude` trailer.** This
-  is an explicit standing request for this repo.
+- **Author is Mouaz only — do NOT add a `Co-Authored-By` trailer for any AI
+  assistant or tool.** This is an explicit standing request for this repo.
 - `.gitignore` gotcha: gitignore does NOT support inline `#` comments — put
   comments on their own line, or the pattern silently breaks.
 
