@@ -1,3 +1,7 @@
+## 0.3.1
+
+- Add a funding link (Ko-fi) to the package metadata and README. No code changes.
+
 ## 0.3.0
 
 - **Haptics.** New `TactileHaptics` (`none`/`light`/`medium`/`heavy`/`selection`)

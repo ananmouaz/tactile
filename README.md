@@ -4,6 +4,7 @@
 [![pub points](https://img.shields.io/pub/points/tactile)](https://pub.dev/packages/tactile/score)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/ananmouaz/tactile/actions/workflows/ci.yml/badge.svg)](https://github.com/ananmouaz/tactile/actions/workflows/ci.yml)
+[![ko-fi](https://img.shields.io/badge/Buy%20me%20a%20coffee-ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ananmouaz)
 
 **Make any Flutter widget feel physical when you touch it.** It tilts toward
 your finger, depresses at the exact press point, and a specular highlight
@@ -223,6 +224,10 @@ fvm flutter analyze
 
 (Plain `flutter` works too if your global SDK satisfies the constraints in
 `pubspec.yaml`.)
+
+## Support
+
+If `tactile` saved you time, you can [buy me a coffee ☕](https://ko-fi.com/ananmouaz).
 
 ## License
 

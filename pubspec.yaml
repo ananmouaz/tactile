@@ -2,9 +2,11 @@ name: tactile
 description: >-
   Make any widget feel physical: it tilts toward your finger, depresses at the
   press point, and a glare tracks where you press. Compositor-only, no shaders.
-version: 0.3.0
+version: 0.3.1
 repository: https://github.com/ananmouaz/tactile
 issue_tracker: https://github.com/ananmouaz/tactile/issues
+funding:
+  - https://ko-fi.com/ananmouaz
 
 topics:
   - ui
