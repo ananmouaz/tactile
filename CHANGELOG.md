@@ -1,3 +1,7 @@
+## 0.3.2
+
+- Make the Ko-fi "Buy me a coffee" button larger and more prominent in the README. No code changes.
+
 ## 0.3.1
 
 - Add a funding link (Ko-fi) to the package metadata and README. No code changes.

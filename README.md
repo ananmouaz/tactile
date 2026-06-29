@@ -4,7 +4,8 @@
 [![pub points](https://img.shields.io/pub/points/tactile)](https://pub.dev/packages/tactile/score)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/ananmouaz/tactile/actions/workflows/ci.yml/badge.svg)](https://github.com/ananmouaz/tactile/actions/workflows/ci.yml)
-[![ko-fi](https://img.shields.io/badge/Buy%20me%20a%20coffee-ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ananmouaz)
+
+<a href="https://ko-fi.com/ananmouaz"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Buy me a coffee on Ko-fi" height="48" /></a>
 
 **Make any Flutter widget feel physical when you touch it.** It tilts toward
 your finger, depresses at the exact press point, and a specular highlight
@@ -227,7 +228,11 @@ fvm flutter analyze
 
 ## Support
 
-If `tactile` saved you time, you can [buy me a coffee ☕](https://ko-fi.com/ananmouaz).
+If `tactile` saved you time, buy me a coffee ☕
+
+<p align="center">
+  <a href="https://ko-fi.com/ananmouaz"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Buy me a coffee on Ko-fi" height="48" /></a>
+</p>
 
 ## License
 
